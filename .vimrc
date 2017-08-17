@@ -6,6 +6,23 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""
 
 " General Settings"{{{
+" If no screen, use color term{{{
+if ($TERM == "vt100")
+  " xterm-color / screen
+  set t_Co=8
+  set t_AF=[1;3%p1%dm
+  set t_AB=[4%p1%dm
+endif
+"}}}
+" Load Default Vim Settings{{{
+if filereadable($VIMRUNTIME . "/vimrc_example.vim")
+ so $VIMRUNTIME/vimrc_example.vim
+endif
+
+if filereadable($VIMRUNTIME . "/macros/matchit.vim")
+ so $VIMRUNTIME/macros/matchit.vim
+endif
+"}}}
 " Default Settings"{{{
 set bs=2		" allow backspacing over everything in insert mode
 set ai			" always set autoindenting on
@@ -38,6 +55,7 @@ set wildmenu
 
 set shiftwidth=4	"TODO: check if 8 is better than 4
 set tabstop=4
+set nohlsearch
 set incsearch
 "}}}
 " ColorSchemes"{{{
