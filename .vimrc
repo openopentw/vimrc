@@ -1,5 +1,3 @@
-" vim: set foldmethod=marker:
-
 """""""""""""""""""""""""""""""""""""""""""""""""""
 " author: YJC (openopentw)
 " description: my default vimrc setting on ubuntu
@@ -27,6 +25,7 @@ endif
 set bs=2		" allow backspacing over everything in insert mode
 set ai			" always set autoindenting on
 " set viminfo='20,\"50	" read/write a .viminfo file, don't store more
+set foldmethod=indent
 "}}}
 " Special Settings"{{{
 set modeline
@@ -41,7 +40,7 @@ set directory=~/tmp,/var/tmp/vi.recover,/tmp,.
 set backup		" keep a backup file
 "}}}
 " Dont know how to use"{{{
-" set showmatch
+set showmatch
 "}}}
 "}}}
 
@@ -49,6 +48,7 @@ set backup		" keep a backup file
 " General Settings"{{{
 set laststatus=2
 set nu	" show line number
+" set foldcolumn=1
 set nowrap	" don't wrap
 set cursorline	" show the same line
 set wildmenu
@@ -60,7 +60,7 @@ set incsearch
 "}}}
 " ColorSchemes"{{{
 " NOTE: default is white now
-" set background=light
+set background=light
 " set background=dark
 
 colorscheme lucius
@@ -77,6 +77,15 @@ let g:lucius_use_bold = 1
 " colorscheme notepad-plus-plus		" the background is strange
 " highlight CursorLine ctermbg=189
 "}}}
+" Length of Tab{{{
+set shiftwidth=4	"TODO: check if 8 is better than 4
+set tabstop=4
+
+autocmd Filetype html setlocal ts=2 sts=2 sw=2 expandtab
+autocmd Filetype css setlocal ts=2 sts=2 sw=2 expandtab
+autocmd Filetype ruby setlocal ts=2 sts=2 sw=2 expandtab
+autocmd Filetype javascript setlocal ts=4 sts=4 sw=4
+"}}}
 " TabLine"{{{
 highlight TabLineSel term=bold,underline cterm=bold,underline ctermfg=7 ctermbg=0
 highlight TabLine    term=bold cterm=bold
@@ -90,19 +99,19 @@ syntax on
 " autocmd BufNewFile,BufReadPost *.css set filetype=css
 " autocmd FileType php set omnifunc=phpcomplete#CompletePHP
 "}}}
-" showing BLANKS"{{{
-" TODO: this is broken
-" set list	" show tabs and blank
-" set lcs=tab:\|\ ,nbsp:%,trail:		" 設置tab和空格樣式
+" showing Tabs(\t)"{{{
+" set list " show all special words
+" set listchars=tab:\|\ " show tabs as '|   '
+" " set leader tabs to be gray
 " highlight LeaderTab guifg=#666666
-" 	" 設定行首tab為灰色
-" match LeaderTab /^\t/				" 匹配行首tab
+" match LeaderTab /^\t/
 "}}}
 " Highlight unwanted spaces in end of line"{{{
 highlight ExtraWhitespace ctermbg=darkred guibg=darkcyan
 autocmd BufEnter * if &ft != 'help' | match ExtraWhitespace /\s\+$/ | endif
-autocmd BufEnter * if &ft == 'help' | match none /\s\+$/ | endif"}}}
-" highlight link potionOperator Operator"{{{
+autocmd BufEnter * if &ft == 'help' | match none /\s\+$/ | endif
+"}}}
+" Highlight Operators: '[{(><='"{{{
 au BufRead,BufNewFile * syn match Braces display '[{}()\[\]]'
 au BufRead,BufNewFile * syn match biOperator "<"
 au BufRead,BufNewFile * syn match biOperator ">"
@@ -110,7 +119,55 @@ au BufRead,BufNewFile * syn match biOperator "<="
 au BufRead,BufNewFile * syn match biOperator ">="
 au BufRead,BufNewFile * syn match biOperator "=="
 au BufRead,BufNewFile * syn match biOperator "\v\~\="
-au BufRead,BufNewFile * syn match biOperator "=""}}}
+au BufRead,BufNewFile * syn match biOperator "="
+"}}}
+" show foldcolumn when there are folds in a file{{{
+function HasFolds() "{{{
+    "Attempt to move between folds, checking line numbers to see if it worked.
+    "If it did, there are folds.
+
+    function! HasFoldsInner()
+        let origline=line('.')
+        :norm zk
+        if origline==line('.')
+            :norm zj
+            if origline==line('.')
+                return 0
+            else
+                return 1
+            endif
+        else
+            return 1
+        endif
+        return 0
+    endfunction
+
+    let l:winview=winsaveview() "save window and cursor position
+    let foldsexist=HasFoldsInner()
+    if foldsexist
+        set foldcolumn=1
+    else
+        "Move to the end of the current fold and check again in case the
+        "cursor was on the sole fold in the file when we checked
+        if line('.')!=1
+            :norm [z
+            :norm k
+        else
+            :norm ]z
+            :norm j
+        endif
+        let foldsexist=HasFoldsInner()
+        if foldsexist
+            set foldcolumn=1
+        else
+            set foldcolumn=0
+        endif
+    end
+    call winrestview(l:winview) "restore window/cursor position
+endfunction
+"}}}
+au CursorHold,BufWinEnter ?* call HasFolds()
+"}}}
 "}}}
 
 " Hotkeys"{{{
@@ -123,15 +180,24 @@ imap JK <Esc>
 "}}}
 " FX keys"{{{
 nmap <F2> <ESC>:tabe 
-nmap <F3> <ESC>:tabe scp://b04902053@linux9.csie.ntu.edu.tw:22/
+if has('win32') || has ('win64')	" if in windows
+	let g:netrw_cygwin = 0
+	let g:netrw_ssh_cmd  = '"C:\Program Files\PuTTY\plink.exe" -batch -T -ssh'
+	let g:netrw_scp_cmd  = '"C:\Program Files\PuTTY\pscp.exe"  -batch -q -scp'
+	let g:netrw_sftp_cmd = '"C:\Program Files\PuTTY\pscp.exe"  -batch -q -sftp'
+endif
+" nmap <F3> <ESC>:tabe scp://b04902053@linux9.csie.ntu.edu.tw:22/
 " nmap <F3> <ESC>:OpenSession 
 nmap <F4> <ESC>:set syntax=
 " nmap <silent> <F5> :NERDTree<CR>	"NOTE: this is defined in /Plugin/Tool
 nmap <F6> <ESC>:vs 
 " map <F7> :set hls!<BAR>set hls?<CR>
 	" to toggle highlight or not on searched words
-" nmap <silent> <F8> <ESC>:!start explorer.exe %:p:h<CR>
-" nmap <silent> <F9> <ESC>:!start powershell.exe<CR>
+if has('win32') || has ('win64')	" if in windows
+	nmap <silent> <F8> <ESC>:!start explorer.exe %:p:h<CR>
+	nmap <silent> <F9> <ESC>:!start powershell.exe<CR>
+	nmap <silent> <F10> <ESC>:!start bash.exe<CR>
+endif
 "}}}
 " about TABs"{{{
 nmap g1 :tabn 1<CR>
@@ -203,8 +269,8 @@ let g:airline#extensions#tabline#enabled = 1
 
 Plug 'vim-airline/vim-airline-themes'
 " let g:airline_theme='sol'
-let g:airline_theme='silver'
-" let g:airline_theme='lucius'
+" let g:airline_theme='silver'
+let g:airline_theme='lucius'
 " let g:airline_powerline_fonts = 1
 
 " Plug 'altercation/vim-colors-solarized'
@@ -253,12 +319,28 @@ let g:session_autosave='no'
 " git
 Plug 'airblade/vim-gitgutter'
 
+" HTML
+Plug 'mattn/emmet-vim'
+
 " JSON
 Plug 'elzr/vim-json'
 
 " YCM
-Plug 'Valloric/YouCompleteMe'
-let g:ycm_global_ycm_extra_conf = '~/.vim/plugged/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+" Plug 'Valloric/YouCompleteMe'
+" let g:ycm_global_ycm_extra_conf = '~/.vim/plugged/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+
+" vim-mucomplete
+Plug 'lifepillar/vim-mucomplete'
+set completeopt+=menuone
+inoremap <expr> <c-e> mucomplete#popup_exit("\<c-e>")
+inoremap <expr> <c-y> mucomplete#popup_exit("\<c-y>")
+inoremap <expr>  <cr> mucomplete#popup_exit("\<cr>")
+" at least one of the following (choose the combination that best fits
+" your taste)
+set completeopt+=noselect
+set completeopt+=noinsert
+" If you want to enable automatic completion at startup
+let g:mucomplete#enable_auto_at_startup = 1
 "}}}
 " markdown"{{{
 " Plugin 'isnowfy/python-vim-instant-markdown'
@@ -286,9 +368,43 @@ if has('gui_running') "{{{
   nnoremap <C-F2> :if &go=~#'T'<Bar>set go-=T<Bar>else<Bar>set go+=T<Bar>endif<CR>
   nnoremap <C-F3> :if &go=~#'r'<Bar>set go-=r<Bar>else<Bar>set go+=r<Bar>endif<CR>
   "}}}
-  " gVim font"{{{
-  set guifont=Ubuntu\ Mono\ 13
-  " let g:airline_powerline_fonts = 1
+  " Set GVim default height & width"{{{
+  if has('win32') || has ('win64')	" if in windows
+    set lines=24 columns=80
+  endif
+  "}}}
+  " GVim font"{{{
+  if has('win32') || has ('win64')	" if in windows
+    " set t_Co=256
+    set guifont=Powerline_Consolas:h12
+    " set guifont=Consolas:h12
+    " set linespace=8
+    " let g:airline_powerline_fonts = 1
+  else	" if in Ubuntu
+    set guifont=Ubuntu\ Mono\ 13
+    " let g:airline_powerline_fonts = 1
+  endif
+  "}}}
+  " Let Gvim Control 輸入法{{{
+  if has('win32') || has ('win64')	" if in windows
+    set imactivatekey=C-space
+    inoremap <ESC> <ESC>:set iminsert=0<CR>
+  endif
+  "}}}
+  " Set Language to utf-8{{{
+  if has('win32') || has ('win64')	" if in windows
+    let $LANG="zh_TW.UTF-8"
+    set langmenu=zh_tw.utf-8
+    set encoding=utf8
+  endif
+  "}}}
+  "reload menu with UTF-8 encoding{{{
+  if has('win32') || has ('win64')	" if in windows
+    source $VIMRUNTIME/delmenu.vim
+    source $VIMRUNTIME/menu.vim
+  endif
   "}}}
 endif
 "}}}
+
+" vim: set foldmethod=marker:
