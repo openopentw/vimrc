@@ -30,17 +30,23 @@ set foldmethod=indent
 " Special Settings"{{{
 set modeline
 set autochdir	" Automatically change to the current directory
+set wildignorecase	" case-insensitive filename completion
 
 " Crontabs must be edited in place
 au BufRead /tmp/crontab* :set backupcopy=yes
+"}}}
+" File Encoding"{{{
+set encoding=utf-8
+set encoding=utf-8
+set langmenu=zh_TW.UTF-8
+language message zh_TW.UTF-8
+set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
 "}}}
 " Backup Dirs"{{{
 set backupdir=~/tmp,.,/var/tmp/vi.recover,/tmp
 set directory=~/tmp,/var/tmp/vi.recover,/tmp,.
 set backup		" keep a backup file
-"}}}
-" Dont know how to use"{{{
-set showmatch
+set showmatch " show another brace when input a brace
 "}}}
 "}}}
 
@@ -57,16 +63,19 @@ set shiftwidth=4	"TODO: check if 8 is better than 4
 set tabstop=4
 set nohlsearch
 set incsearch
+set breakindent
 "}}}
 " ColorSchemes"{{{
 " NOTE: default is white now
-set background=light
-" set background=dark
+" set background=light
+set background=dark
 
 colorscheme lucius
-LuciusWhite
-" LuciusDark
+" LuciusWhite
+LuciusDark
+" LuciusDarkHighContrast
 " LuciusDarkLowContrast
+" LuciusBlack
 " LuciusBlackLowContrast
 " LuciusWhiteLowContrast
 " LuciusLight
@@ -172,10 +181,10 @@ au CursorHold,BufWinEnter ?* call HasFolds()
 
 " Hotkeys"{{{
 " ESC"{{{
-imap jk <Esc>
-imap Jk <Esc>
-imap jK <Esc>
-imap JK <Esc>
+" imap jk <Esc>
+" imap Jk <Esc>
+" imap jK <Esc>
+" imap JK <Esc>
 				" by the way, it can be typed faster than jj.
 "}}}
 " FX keys"{{{
@@ -278,9 +287,16 @@ let g:airline_theme='lucius'
 " TODO: check if it is useful
 " Plug 'captbaritone/better-indent-support-for-php-with-html'
 
-" Plug 'junegunn/goyo.vim'
+Plug 'junegunn/goyo.vim'
 " Plug 'junegunn/limelight.vim'
 " Plug 'junegunn/seoul256.vim'
+
+" tmux statusline generator with airline theme
+Plug 'edkolev/tmuxline.vim'
+" for tmuxline + vim-airline integration
+let g:airline#extensions#tmuxline#enabled = 1
+" start tmuxline even without vim running
+let airline#extensions#tmuxline#snapshot_file = "~/.tmux-status.conf"
 "}}}
 " Tools "{{{
 Plug 'scrooloose/nerdtree'
@@ -328,19 +344,6 @@ Plug 'elzr/vim-json'
 " YCM
 " Plug 'Valloric/YouCompleteMe'
 " let g:ycm_global_ycm_extra_conf = '~/.vim/plugged/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
-
-" vim-mucomplete
-Plug 'lifepillar/vim-mucomplete'
-set completeopt+=menuone
-inoremap <expr> <c-e> mucomplete#popup_exit("\<c-e>")
-inoremap <expr> <c-y> mucomplete#popup_exit("\<c-y>")
-inoremap <expr>  <cr> mucomplete#popup_exit("\<cr>")
-" at least one of the following (choose the combination that best fits
-" your taste)
-set completeopt+=noselect
-set completeopt+=noinsert
-" If you want to enable automatic completion at startup
-let g:mucomplete#enable_auto_at_startup = 1
 "}}}
 " markdown"{{{
 " Plugin 'isnowfy/python-vim-instant-markdown'
